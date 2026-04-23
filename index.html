@@ -871,26 +871,62 @@
   <a href="https://linkedin.com/in/emouta" target="_blank">linkedin.com/in/emouta</a>
 </footer>
 
+<script src="https://groot.mailerlite.com/js/w/webforms.min.js?vb397d78ebaa8a0f631d35384c46d781b" type="text/javascript"></script>
 <script>
-  function handleSubmit() {
+  const ML_ENDPOINT = 'https://assets.mailerlite.com/jsonp/2286426/forms/185471074825144165/subscribe';
+
+  async function submitToML(email, nome) {
+    const body = new URLSearchParams();
+    body.append('fields[email]', email);
+    if (nome) body.append('fields[name]', nome);
+    body.append('ml-submit', '1');
+    body.append('anticsrf', 'true');
+
+    const res = await fetch(ML_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
+    });
+    return res.ok;
+  }
+
+  async function handleSubmit() {
     const nome = document.getElementById('nome').value.trim();
     const email = document.getElementById('email').value.trim();
     if (!email || !email.includes('@')) {
       document.getElementById('email').focus();
       return;
     }
-    document.querySelector('.form-card').style.display = 'none';
-    document.getElementById('success-hero').style.display = 'block';
+    const btn = document.querySelector('.form-card .cta-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    const ok = await submitToML(email, nome).catch(() => false);
+    if (ok) {
+      document.querySelector('.form-card').style.display = 'none';
+      document.getElementById('success-hero').style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Quero garantir minha vaga na lista →';
+    }
   }
 
-  function handleSubmitFinal() {
+  async function handleSubmitFinal() {
     const email = document.getElementById('email-final').value.trim();
     if (!email || !email.includes('@')) {
       document.getElementById('email-final').focus();
       return;
     }
-    document.getElementById('final-form').style.display = 'none';
-    document.getElementById('success-final').style.display = 'block';
+    const btn = document.querySelector('#final-form button');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    const ok = await submitToML(email, '').catch(() => false);
+    if (ok) {
+      document.getElementById('final-form').style.display = 'none';
+      document.getElementById('success-final').style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Garantir minha vaga →';
+    }
   }
 </script>
 </body>
